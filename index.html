@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrossOver Move Out Analysis — Year over Year</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-card: #1b2a4a;
+  --bg-card-hover: #223358;
+  --bg-table-row: #1e2d50;
+  --bg-table-alt: #172342;
+  --text-primary: #e8eaf0;
+  --text-secondary: #a0aec0;
+  --text-muted: #6b7a94;
+  --text-accent: #63b3ed;
+  --color-2024: #4A90D9;
+  --color-2025: #F5A623;
+  --color-2026: #7ED321;
+  --color-2024-bg: rgba(74, 144, 217, 0.15);
+  --color-2025-bg: rgba(245, 166, 35, 0.15);
+  --color-2026-bg: rgba(126, 211, 33, 0.15);
+  --accent-red: #ef5350;
+  --accent-green: #66bb6a;
+  --border-color: #2a3a5c;
+  --border-light: #344766;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  --radius: 12px;
+  --transition: 0.2s ease;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', Roboto, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ===== LAYOUT ===== */
+.dashboard {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px 32px 60px;
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-left h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.3px;
+}
+
+.header-left .subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.header-right {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.header-badge {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 16px;
+  text-align: center;
+  min-width: 100px;
+}
+
+.header-badge .label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.header-badge .value {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.header-badge .value.c2024 { color: var(--color-2024); }
+.header-badge .value.c2025 { color: var(--color-2025); }
+.header-badge .value.c2026 { color: var(--color-2026); }
+
+/* ===== KPI CARDS ===== */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.kpi-card.c2024::before { background: var(--color-2024); }
+.kpi-card.c2025::before { background: var(--color-2025); }
+.kpi-card.c2026::before { background: var(--color-2026); }
+.kpi-card.neutral::before { background: linear-gradient(90deg, var(--color-2024), var(--color-2025), var(--color-2026)); }
+
+.kpi-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.kpi-value {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.kpi-value.c2024 { color: var(--color-2024); }
+.kpi-value.c2025 { color: var(--color-2025); }
+.kpi-value.c2026 { color: var(--color-2026); }
+
+.kpi-change {
+  font-size: 12px;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.kpi-change.positive { color: var(--accent-green); }
+.kpi-change.negative { color: var(--accent-red); }
+.kpi-change.neutral-text { color: var(--text-secondary); }
+
+.kpi-detail {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ===== SECTION HEADERS ===== */
+.section-header {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-header .tag {
+  font-size: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  padding: 2px 8px;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* ===== CHART CONTAINERS ===== */
+.chart-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.chart-full {
+  margin-bottom: 32px;
+}
+
+.chart-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 20px;
+  position: relative;
+}
+
+.chart-container h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.chart-wrapper.bar-chart { height: 360px; }
+.chart-wrapper.line-chart { height: 320px; }
+.chart-wrapper.line-chart-tall { height: 360px; }
+
+/* ===== TABLES ===== */
+.table-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 32px;
+  overflow-x: auto;
+}
+
+.table-container h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead th {
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+  padding: 10px 12px;
+  text-align: right;
+  border-bottom: 2px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  white-space: nowrap;
+}
+
+thead th:first-child {
+  text-align: left;
+}
+
+tbody td {
+  padding: 8px 12px;
+  text-align: right;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+tbody td:first-child {
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+tbody tr:nth-child(even) {
+  background: var(--bg-table-alt);
+}
+
+tbody tr:hover {
+  background: var(--bg-card-hover);
+}
+
+.cell-2024 { color: var(--color-2024); }
+.cell-2025 { color: var(--color-2025); }
+.cell-2026 { color: var(--color-2026); }
+
+.cell-change-pos { color: var(--accent-green); font-weight: 600; }
+.cell-change-neg { color: var(--accent-red); font-weight: 600; }
+
+.cell-highlight {
+  background: rgba(126, 211, 33, 0.08) !important;
+  font-weight: 700;
+}
+
+.cell-today {
+  background: rgba(245, 166, 35, 0.12) !important;
+  border-left: 3px solid var(--color-2025);
+}
+
+.row-total {
+  font-weight: 700 !important;
+  border-top: 2px solid var(--border-light);
+}
+
+.row-total td {
+  font-weight: 700;
+  padding-top: 12px;
+}
+
+/* ===== 180-DAY STRATEGY NOTE ===== */
+.strategy-note {
+  background: linear-gradient(135deg, #1b2a4a 0%, #162040 100%);
+  border: 1px solid var(--color-2026);
+  border-left: 4px solid var(--color-2026);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.strategy-note h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-2026);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.strategy-note p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.strategy-note .formula {
+  display: inline-block;
+  background: rgba(126, 211, 33, 0.1);
+  border: 1px solid rgba(126, 211, 33, 0.3);
+  border-radius: 6px;
+  padding: 8px 14px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--color-2026);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* ===== LEGEND ===== */
+.custom-legend {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ===== STATUS BAR ===== */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot.live {
+  background: var(--accent-green);
+  box-shadow: 0 0 6px rgba(102, 187, 106, 0.6);
+  animation: pulse-green 2s ease-in-out infinite;
+}
+
+.status-dot.static {
+  background: var(--accent-red);
+  box-shadow: 0 0 6px rgba(239, 83, 80, 0.4);
+}
+
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.status-label.live { color: var(--accent-green); }
+.status-label.static { color: var(--accent-red); }
+
+.status-time {
+  color: var(--text-muted);
+}
+
+.refresh-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  padding: 4px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.refresh-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.refresh-btn .spin {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  text-align: center;
+  padding: 24px 0 0;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .chart-row { grid-template-columns: 1fr; }
+  .dashboard { padding: 16px; }
+}
+
+@media (max-width: 768px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .header { flex-direction: column; }
+  .header-right { justify-content: flex-start; }
+  .kpi-value { font-size: 26px; }
+  .header-left h1 { font-size: 20px; }
+}
+
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+}
+
+/* ===== PRINT ===== */
+@media print {
+  :root {
+    --bg-primary: #fff;
+    --bg-secondary: #f5f5f5;
+    --bg-card: #fff;
+    --bg-table-row: #fff;
+    --bg-table-alt: #f8f9fa;
+    --text-primary: #1a1a1a;
+    --text-secondary: #4a4a4a;
+    --text-muted: #888;
+    --border-color: #ddd;
+    --border-light: #ccc;
+  }
+
+  body {
+    background: #fff;
+    color: #1a1a1a;
+    font-size: 11px;
+  }
+
+  .dashboard { padding: 12px; max-width: 100%; }
+
+  .kpi-card, .chart-container, .table-container, .strategy-note {
+    break-inside: avoid;
+    box-shadow: none;
+    border-color: #ddd;
+  }
+
+  .chart-row { grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .kpi-card:hover { transform: none; box-shadow: none; }
+
+  .chart-wrapper.bar-chart { height: 280px; }
+  .chart-wrapper.line-chart { height: 240px; }
+  .chart-wrapper.line-chart-tall { height: 280px; }
+
+  canvas { max-width: 100% !important; }
+
+  .strategy-note {
+    border-color: #7ED321;
+    background: #f0fbe4;
+  }
+
+  .status-bar { display: none; }
+  .footer { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+
+  <!-- ===== STATUS BAR ===== -->
+  <div class="status-bar" id="statusBar">
+    <div class="status-indicator">
+      <div class="status-dot static" id="statusDot"></div>
+      <span class="status-label static" id="statusLabel">LOADING...</span>
+    </div>
+    <span class="status-time" id="statusTime"></span>
+    <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">
+      <span id="refreshIcon">&#x21bb;</span> Refresh
+    </button>
+  </div>
+
+  <!-- ===== HEADER ===== -->
+  <div class="header">
+    <div class="header-left">
+      <h1>CrossOver Move Out Analysis</h1>
+      <div class="subtitle" id="headerSubtitle">Year over Year Comparison &mdash; 2024 / 2025 / 2026 &nbsp;|&nbsp; Loading...</div>
+    </div>
+    <div class="header-right" id="headerBadges">
+      <div class="header-badge">
+        <div class="label">2024 Total</div>
+        <div class="value c2024" id="badge2024">--</div>
+      </div>
+      <div class="header-badge">
+        <div class="label">2025 Total</div>
+        <div class="value c2025" id="badge2025">--</div>
+      </div>
+      <div class="header-badge">
+        <div class="label">2026 YTD</div>
+        <div class="value c2026" id="badge2026">--</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KPI CARDS ===== -->
+  <div class="section-header">Key Metrics <span class="tag">KPI</span></div>
+  <div class="kpi-grid" id="kpiGrid">
+    <!-- KPI cards rendered dynamically -->
+  </div>
+
+  <!-- ===== 180-DAY STRATEGY NOTE ===== -->
+  <div class="strategy-note">
+    <h3>&#9670; 180-Day Strategy Note</h3>
+    <p>
+      Fewer Move Outs = Longer guest stays &rarr; More guests exceeding 180 days &rarr; 93% payout rate &amp; full tax exemption
+    </p>
+    <div class="formula">
+      Move Out &darr; &nbsp;&rarr;&nbsp; Stay Length &uarr; &nbsp;&rarr;&nbsp; 180+ Day Guests &uarr; &nbsp;&rarr;&nbsp; Payout 93% + Tax Free
+    </div>
+  </div>
+
+  <!-- ===== CHART 1: Monthly Bar Chart ===== -->
+  <div class="chart-full">
+    <div class="section-header">Monthly Move Out Comparison <span class="tag">CHART 1</span></div>
+    <div class="chart-container">
+      <h3>Monthly Move Outs &mdash; 2024 vs 2025 vs 2026</h3>
+      <div class="chart-wrapper bar-chart">
+        <canvas id="chartMonthly"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CHART 2 & 3: March Daily + Cumulative ===== -->
+  <div class="chart-row">
+    <div>
+      <div class="section-header">March Daily Move Outs <span class="tag">CHART 2</span></div>
+      <div class="chart-container">
+        <h3>March Daily Move Outs &mdash; Day 1-31</h3>
+        <div class="custom-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--color-2024)"></div>March 2024</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--color-2025)"></div>March 2025</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--color-2026)"></div>March 2026</div>
+          <div class="legend-item"><div class="legend-dot" style="background:transparent; border: 2px dashed var(--text-muted)"></div>7-day MA</div>
+        </div>
+        <div class="chart-wrapper line-chart-tall">
+          <canvas id="chartMarchDaily"></canvas>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="section-header">March Cumulative Move Outs <span class="tag">CHART 3</span></div>
+      <div class="chart-container">
+        <h3>Cumulative Move Outs Through March</h3>
+        <div class="chart-wrapper line-chart-tall">
+          <canvas id="chartCumulative"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CHART 4: Daily Average Trend ===== -->
+  <div class="chart-full">
+    <div class="section-header">Monthly Daily Average Trend <span class="tag">CHART 4</span></div>
+    <div class="chart-container">
+      <h3>Monthly Daily Average Move Outs &mdash; Seasonal Pattern</h3>
+      <div class="chart-wrapper line-chart">
+        <canvas id="chartDailyAvg"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CHART 5: Move Out Rate (% of Total Rooms) ===== -->
+  <div class="chart-full">
+    <div class="section-header">Monthly Move Out Rate <span class="tag">CHART 5</span></div>
+    <div class="chart-container">
+      <h3>Move Out Rate (% of Total Rooms) &mdash; Normalizing for Portfolio Growth</h3>
+      <div style="font-size:11px; color:#6b7a94; margin-bottom:12px;">
+        Total rooms: 2024 ≈ <span id="unitCount2024">135</span> &nbsp;|&nbsp; 2025 ≈ <span id="unitCount2025">150</span> &nbsp;|&nbsp; 2026 ≈ <span id="unitCount2026">153</span>
+        &nbsp;&nbsp;<span style="opacity:0.6">(configurable)</span>
+      </div>
+      <div class="chart-wrapper bar-chart">
+        <canvas id="chartMoveOutRate"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DATA TABLE: Monthly Comparison ===== -->
+  <div class="section-header">Monthly Data Table <span class="tag">DATA</span></div>
+  <div class="table-container">
+    <h3>Full Monthly Comparison &mdash; Move Outs by Month</h3>
+    <table id="tableMonthly">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>2024</th>
+          <th>2025</th>
+          <th>YoY Change</th>
+          <th>2026</th>
+          <th>vs 2025</th>
+          <th>Avg/Day 2024</th>
+          <th>Avg/Day 2025</th>
+          <th>Avg/Day 2026</th>
+        </tr>
+      </thead>
+      <tbody id="tableMonthlyBody"></tbody>
+    </table>
+  </div>
+
+  <!-- ===== DATA TABLE: March Deep Dive ===== -->
+  <div class="section-header">March Daily Detail <span class="tag">MARCH DEEP DIVE</span></div>
+  <div class="table-container">
+    <h3>March Day-by-Day Comparison</h3>
+    <table id="tableMarch">
+      <thead>
+        <tr>
+          <th>Day</th>
+          <th>2024</th>
+          <th>2025</th>
+          <th>2026</th>
+          <th>Cumul. 2024</th>
+          <th>Cumul. 2025</th>
+          <th>Cumul. 2026</th>
+        </tr>
+      </thead>
+      <tbody id="tableMarchBody"></tbody>
+    </table>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <div class="footer" id="footerText">
+    CrossOver / TKNY Management &mdash; Move Out YoY Analysis
+  </div>
+
+</div>
+
+<script>
+// ===================================================================
+// CONSTANTS
+// ===================================================================
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS_IN_MONTH_BY_YEAR = {
+  2024: [31,29,31,30,31,30,31,31,30,31,30,31],
+  2025: [31,28,31,30,31,30,31,31,30,31,30,31],
+  2026: [31,28,31,30,31,30,31,31,30,31,30,31]
+};
+
+const C2024 = '#4A90D9';
+const C2025 = '#F5A623';
+const C2026 = '#7ED321';
+const C2024_A = 'rgba(74, 144, 217, 0.7)';
+const C2025_A = 'rgba(245, 166, 35, 0.7)';
+const C2026_A = 'rgba(126, 211, 33, 0.7)';
+
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMsC-_Dyf60_scQn-OZH3OZXF8xS-NqsG7QCRpjtd9Masy9b65NtkNDEMaCiyE0JjHKccLx2N-AANh/pub?gid=359503005&single=true&output=csv';
+
+// Total rooms/units in portfolio by year (estimated)
+// Used to calculate Move Out Rate (%) for fair YoY comparison
+// Update these values as portfolio grows
+const TOTAL_UNITS = {
+  2024: 135,  // ~135 rooms (smaller portfolio)
+  2025: 150,  // ~150 rooms (growing through year)
+  2026: 153   // ~153 rooms (current)
+};
+
+// Chart.js defaults
+Chart.defaults.color = '#a0aec0';
+Chart.defaults.borderColor = 'rgba(42, 58, 92, 0.5)';
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans JP', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.pointStyle = 'circle';
+Chart.defaults.plugins.legend.labels.padding = 16;
+Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(22, 33, 62, 0.95)';
+Chart.defaults.plugins.tooltip.titleFont = { weight: '600', size: 13 };
+Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
+Chart.defaults.plugins.tooltip.padding = 12;
+Chart.defaults.plugins.tooltip.cornerRadius = 8;
+Chart.defaults.plugins.tooltip.borderColor = 'rgba(42, 58, 92, 0.8)';
+Chart.defaults.plugins.tooltip.borderWidth = 1;
+
+// ===================================================================
+// FALLBACK DATA (hardcoded — used if fetch fails)
+// ===================================================================
+const FALLBACK_DATA = {
+  monthly: {
+    2024: [51,34,38,41,56,50,43,70,55,38,62,59],
+    2025: [52,46,47,40,45,51,40,59,50,51,42,51],
+    2026: [42,42,11,null,null,null,null,null,null,null,null,null]
+  },
+  marchDaily: {
+    2024: [6,2,2,0,1,1,2,0,2,1,0,0,1,0,4,0,1,0,1,0,0,1,3,3,1,1,0,0,1,2,2],
+    2025: [7,5,1,2,2,0,1,0,0,4,1,0,0,0,1,0,2,1,0,2,0,2,2,2,0,0,0,1,2,0,9],
+    2026: [10,1]
+  },
+  avgDaily: {
+    2024: [1.6,1.2,1.2,1.4,1.8,1.7,1.4,2.3,1.8,1.2,2.1,1.9],
+    2025: [1.7,1.6,1.5,1.3,1.5,1.7,1.3,1.9,1.7,1.6,1.4,1.6],
+    2026: [1.4,1.5,5.5,null,null,null,null,null,null,null,null,null]
+  },
+  yearTotals: { 2024: 597, 2025: 574, 2026: 95 },
+  yearDays: { 2024: 366, 2025: 365, 2026: 61 },
+  lastDate: '2026-03-02',
+  isLive: false
+};
+
+// ===================================================================
+// CSV PARSER (handles quoted fields with embedded newlines/commas)
+// ===================================================================
+function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i+1] === '"') { field += '"'; i++; }
+        else { inQuotes = false; }
+      } else { field += c; }
+    } else {
+      if (c === '"') { inQuotes = true; }
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n' || (c === '\r' && text[i+1] === '\n')) {
+        row.push(field); field = ''; rows.push(row); row = [];
+        if (c === '\r') i++;
+      } else { field += c; }
+    }
+  }
+  if (field || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+// ===================================================================
+// FETCH & PARSE SHEET DATA
+// ===================================================================
+async function fetchSheetData() {
+  const response = await fetch(SHEET_CSV_URL);
+  if (!response.ok) throw new Error('HTTP ' + response.status);
+  const text = await response.text();
+  const rows = parseCSV(text);
+
+  if (rows.length < 13) throw new Error('CSV has fewer rows than expected (' + rows.length + ')');
+
+  const dateRow = rows[8];
+  const moveOutRow = rows[12];
+
+  // Parse date columns and collect move out values
+  const datePattern = /^\d{1,2}\/\d{1,2}$/;
+  let currentYear = 2024;
+  let prevMonth = null;
+
+  // Data structures: year -> month(0-based) -> array of daily values
+  const dailyByYearMonth = {};
+  let lastDateStr = '';
+
+  for (let col = 0; col < dateRow.length; col++) {
+    const cellVal = (dateRow[col] || '').trim();
+    if (!datePattern.test(cellVal)) continue;
+
+    const parts = cellVal.split('/');
+    const month = parseInt(parts[0], 10);  // 1-12
+    const day = parseInt(parts[1], 10);
+
+    // Year assignment: track month transitions
+    if (prevMonth !== null && prevMonth === 12 && month === 1) {
+      currentYear++;
+    }
+    prevMonth = month;
+
+    const moveOutVal = (moveOutRow[col] || '').trim();
+    if (moveOutVal === '') continue; // Skip empty cells — no data for this date yet
+    const moveOuts = parseInt(moveOutVal, 10);
+    if (isNaN(moveOuts)) continue;
+
+    const yr = currentYear;
+    const mi = month - 1; // 0-based month index
+
+    if (!dailyByYearMonth[yr]) dailyByYearMonth[yr] = {};
+    if (!dailyByYearMonth[yr][mi]) dailyByYearMonth[yr][mi] = [];
+    dailyByYearMonth[yr][mi].push({ day: day, value: moveOuts });
+
+    // Track last date with data
+    const paddedMonth = String(month).padStart(2, '0');
+    const paddedDay = String(day).padStart(2, '0');
+    lastDateStr = yr + '-' + paddedMonth + '-' + paddedDay;
+  }
+
+  // Build output data structure
+  const monthly = {};
+  const avgDaily = {};
+  const marchDaily = {};
+  const yearTotals = {};
+  const yearDays = {};
+
+  const years = Object.keys(dailyByYearMonth).map(Number).sort();
+  const daysInMonth = DAYS_IN_MONTH_BY_YEAR;
+
+  for (const yr of years) {
+    monthly[yr] = new Array(12).fill(null);
+    avgDaily[yr] = new Array(12).fill(null);
+    let yrTotal = 0;
+    let yrDayCount = 0;
+
+    for (let mi = 0; mi < 12; mi++) {
+      const dayData = (dailyByYearMonth[yr] && dailyByYearMonth[yr][mi]) || null;
+      if (!dayData || dayData.length === 0) {
+        monthly[yr][mi] = null;
+        avgDaily[yr][mi] = null;
+        continue;
+      }
+
+      const monthTotal = dayData.reduce((s, d) => s + d.value, 0);
+      monthly[yr][mi] = monthTotal;
+      yrTotal += monthTotal;
+      yrDayCount += dayData.length;
+
+      // Daily average: total / days that have data in this month
+      const dim = (daysInMonth[yr] || daysInMonth[2026])[mi];
+      const daysWithData = dayData.length;
+      // If it's a complete month (all days present), use full month days for avg
+      // If partial, use days with data
+      const divisor = (daysWithData >= dim) ? dim : daysWithData;
+      avgDaily[yr][mi] = parseFloat((monthTotal / divisor).toFixed(1));
+
+      // March daily data (month index 2)
+      if (mi === 2) {
+        // Sort by day and build array indexed 0-30
+        const sorted = dayData.slice().sort((a, b) => a.day - b.day);
+        marchDaily[yr] = sorted.map(d => d.value);
+      }
+    }
+
+    yearTotals[yr] = yrTotal;
+    yearDays[yr] = yrDayCount;
+  }
+
+  return {
+    monthly: monthly,
+    marchDaily: marchDaily,
+    avgDaily: avgDaily,
+    yearTotals: yearTotals,
+    yearDays: yearDays,
+    lastDate: lastDateStr,
+    isLive: true
+  };
+}
+
+// ===================================================================
+// CHART INSTANCES (for cleanup on re-render)
+// ===================================================================
+let chartMonthlyInst = null;
+let chartMarchDailyInst = null;
+let chartCumulativeInst = null;
+let chartDailyAvgInst = null;
+let chartMoveOutRateInst = null;
+
+function destroyCharts() {
+  if (chartMonthlyInst) { chartMonthlyInst.destroy(); chartMonthlyInst = null; }
+  if (chartMarchDailyInst) { chartMarchDailyInst.destroy(); chartMarchDailyInst = null; }
+  if (chartCumulativeInst) { chartCumulativeInst.destroy(); chartCumulativeInst = null; }
+  if (chartDailyAvgInst) { chartDailyAvgInst.destroy(); chartDailyAvgInst = null; }
+  if (chartMoveOutRateInst) { chartMoveOutRateInst.destroy(); chartMoveOutRateInst = null; }
+}
+
+// ===================================================================
+// HELPER: Moving Average
+// ===================================================================
+function movingAverage(arr, window) {
+  const result = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (i < window - 1) {
+      let sum = 0;
+      for (let j = 0; j <= i; j++) sum += arr[j];
+      result.push(parseFloat((sum / (i + 1)).toFixed(2)));
+    } else {
+      let sum = 0;
+      for (let j = i - window + 1; j <= i; j++) sum += arr[j];
+      result.push(parseFloat((sum / window).toFixed(2)));
+    }
+  }
+  return result;
+}
+
+// ===================================================================
+// HELPER: Cumulative
+// ===================================================================
+function cumulative(arr) {
+  const result = [];
+  let sum = 0;
+  for (let i = 0; i < arr.length; i++) {
+    sum += arr[i];
+    result.push(sum);
+  }
+  return result;
+}
+
+// ===================================================================
+// RENDER DASHBOARD
+// ===================================================================
+function renderDashboard(data) {
+  destroyCharts();
+
+  const today = new Date();
+  const todayMonth = today.getMonth(); // 0-based
+  const todayDay = today.getDate();
+  const todayYear = today.getFullYear();
+
+  // Determine the "as of" date from data
+  const lastDate = data.lastDate || new Date().toISOString().slice(0, 10);
+  const lastDateObj = new Date(lastDate + 'T00:00:00');
+  const asOfStr = lastDateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+  // Extract data arrays
+  const data2024 = data.monthly[2024] || new Array(12).fill(null);
+  const data2025 = data.monthly[2025] || new Array(12).fill(null);
+  const data2026 = data.monthly[2026] || new Array(12).fill(null);
+
+  const avgDay2024 = data.avgDaily[2024] || new Array(12).fill(null);
+  const avgDay2025 = data.avgDaily[2025] || new Array(12).fill(null);
+  const avgDay2026 = data.avgDaily[2026] || new Array(12).fill(null);
+
+  const march2024 = data.marchDaily[2024] || [];
+  const march2025 = data.marchDaily[2025] || [];
+  const march2026 = data.marchDaily[2026] || [];
+
+  const total2024 = data.yearTotals[2024] || 0;
+  const total2025 = data.yearTotals[2025] || 0;
+  const total2026 = data.yearTotals[2026] || 0;
+
+  const days2024 = data.yearDays[2024] || 366;
+  const days2025 = data.yearDays[2025] || 365;
+  const days2026 = data.yearDays[2026] || 1;
+
+  // ===== Update header =====
+  document.getElementById('headerSubtitle').innerHTML =
+    'Year over Year Comparison &mdash; 2024 / 2025 / 2026 &nbsp;|&nbsp; As of ' + asOfStr;
+
+  // ===== Update badges =====
+  document.getElementById('badge2024').textContent = total2024;
+  document.getElementById('badge2025').textContent = total2025;
+  document.getElementById('badge2026').textContent = total2026;
+
+  // ===== Update KPI cards =====
+  const dailyAvg2024 = (total2024 / days2024).toFixed(2);
+  const dailyAvg2025 = (total2025 / days2025).toFixed(2);
+  const dailyAvg2026 = (total2026 / Math.max(days2026, 1)).toFixed(2);
+
+  const yoyChange2025 = total2024 > 0 ? ((total2025 - total2024) / total2024 * 100).toFixed(1) : 0;
+  const yoyDiff2025 = total2025 - total2024;
+  const dailyAvgChange = days2024 > 0 ? (((total2025/days2025) - (total2024/days2024)) / (total2024/days2024) * 100).toFixed(1) : 0;
+
+  // Build 2026 YTD detail: monthly breakdown
+  let ytdDetail = '';
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const ytdParts = [];
+  for (let i = 0; i < 12; i++) {
+    if (data2026[i] !== null) {
+      // Check if this is a partial month
+      const dim = (DAYS_IN_MONTH_BY_YEAR[2026] || DAYS_IN_MONTH_BY_YEAR[2025])[i];
+      const marchDailyLen = (i === 2 && march2026.length > 0 && march2026.length < dim) ? ' (' + march2026.length + ' days)' : '';
+      // For non-march months, check if partial by looking at last date
+      let partialStr = marchDailyLen;
+      if (i !== 2 && data2026[i] !== null) {
+        // If last date is in this month, it might be partial
+        const ldMonth = lastDateObj.getMonth();
+        const ldDay = lastDateObj.getDate();
+        if (lastDateObj.getFullYear() === 2026 && ldMonth === i && ldDay < dim) {
+          partialStr = ' (' + ldDay + ' days)';
+        }
+      }
+      ytdParts.push(monthNames[i] + ': ' + data2026[i] + partialStr);
+    }
+  }
+  ytdDetail = ytdParts.join(' + ');
+
+  // ===== MOVE OUT RATE (% of Total Rooms) — calculated before KPIs =====
+  const rate2024 = data2024.map(v => v !== null ? parseFloat((v / TOTAL_UNITS[2024] * 100).toFixed(1)) : null);
+  const rate2025 = data2025.map(v => v !== null ? parseFloat((v / TOTAL_UNITS[2025] * 100).toFixed(1)) : null);
+  const rate2026 = data2026.map(v => v !== null ? parseFloat((v / TOTAL_UNITS[2026] * 100).toFixed(1)) : null);
+
+  const validRate2024 = rate2024.filter(v => v !== null);
+  const validRate2025 = rate2025.filter(v => v !== null);
+  const avgRate2024 = validRate2024.length > 0 ? (validRate2024.reduce((a,b) => a+b, 0) / validRate2024.length).toFixed(1) : '—';
+  const avgRate2025 = validRate2025.length > 0 ? (validRate2025.reduce((a,b) => a+b, 0) / validRate2025.length).toFixed(1) : '—';
+
+  const kpiGrid = document.getElementById('kpiGrid');
+  kpiGrid.innerHTML = `
+    <div class="kpi-card c2024">
+      <div class="kpi-label">Total Move Outs 2024</div>
+      <div class="kpi-value c2024">${total2024}</div>
+      <div class="kpi-detail">12 months &mdash; Jan to Dec</div>
+    </div>
+    <div class="kpi-card c2025">
+      <div class="kpi-label">Total Move Outs 2025</div>
+      <div class="kpi-value c2025">${total2025}</div>
+      <div class="kpi-change ${parseFloat(yoyChange2025) <= 0 ? 'positive' : 'negative'}">&darr; ${Math.abs(yoyChange2025)}% vs 2024 (${Math.abs(yoyDiff2025)} ${yoyDiff2025 <= 0 ? 'fewer' : 'more'})</div>
+    </div>
+    <div class="kpi-card c2026">
+      <div class="kpi-label">2026 YTD (${days2026} days)</div>
+      <div class="kpi-value c2026">${total2026}</div>
+      <div class="kpi-detail">${ytdDetail}</div>
+    </div>
+    <div class="kpi-card c2024">
+      <div class="kpi-label">Daily Average 2024</div>
+      <div class="kpi-value c2024">${dailyAvg2024}</div>
+      <div class="kpi-detail">Move Outs / day (${days2024} days)</div>
+    </div>
+    <div class="kpi-card c2025">
+      <div class="kpi-label">Daily Average 2025</div>
+      <div class="kpi-value c2025">${dailyAvg2025}</div>
+      <div class="kpi-change ${parseFloat(dailyAvgChange) <= 0 ? 'positive' : 'negative'}">${parseFloat(dailyAvgChange) <= 0 ? '&darr;' : '&uarr;'} ${Math.abs(dailyAvgChange)}% vs 2024</div>
+    </div>
+    <div class="kpi-card c2026">
+      <div class="kpi-label">Daily Average 2026 YTD</div>
+      <div class="kpi-value c2026">${dailyAvg2026}</div>
+      <div class="kpi-detail">${total2026} Move Outs / ${days2026} days</div>
+    </div>
+    <div class="kpi-card c2024">
+      <div class="kpi-label">Avg Monthly Rate 2024</div>
+      <div class="kpi-value c2024">${avgRate2024}%</div>
+      <div class="kpi-detail">Move Outs per month / ${TOTAL_UNITS[2024]} rooms</div>
+    </div>
+    <div class="kpi-card c2025">
+      <div class="kpi-label">Avg Monthly Rate 2025</div>
+      <div class="kpi-value c2025">${avgRate2025}%</div>
+      <div class="kpi-change ${parseFloat(avgRate2025) <= parseFloat(avgRate2024) ? 'positive' : 'negative'}">${parseFloat(avgRate2025) <= parseFloat(avgRate2024) ? '&darr;' : '&uarr;'} ${Math.abs(parseFloat(avgRate2025) - parseFloat(avgRate2024)).toFixed(1)} pp vs 2024</div>
+    </div>
+  `;
+
+  // ===== CHART 1: Monthly Bar Chart =====
+  chartMonthlyInst = new Chart(document.getElementById('chartMonthly'), {
+    type: 'bar',
+    data: {
+      labels: MONTHS,
+      datasets: [
+        {
+          label: '2024',
+          data: data2024,
+          backgroundColor: C2024_A,
+          borderColor: C2024,
+          borderWidth: 1,
+          borderRadius: 4,
+          barPercentage: 0.8,
+          categoryPercentage: 0.7
+        },
+        {
+          label: '2025',
+          data: data2025,
+          backgroundColor: C2025_A,
+          borderColor: C2025,
+          borderWidth: 1,
+          borderRadius: 4,
+          barPercentage: 0.8,
+          categoryPercentage: 0.7
+        },
+        {
+          label: '2026',
+          data: data2026,
+          backgroundColor: C2026_A,
+          borderColor: C2026,
+          borderWidth: 1,
+          borderRadius: 4,
+          barPercentage: 0.8,
+          categoryPercentage: 0.7
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            afterBody: function(tooltipItems) {
+              const idx = tooltipItems[0].dataIndex;
+              const v24 = data2024[idx];
+              const v25 = data2025[idx];
+              if (v24 && v25) {
+                const change = ((v25 - v24) / v24 * 100).toFixed(1);
+                return '\nYoY: ' + (change > 0 ? '+' : '') + change + '%';
+              }
+              return '';
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false } },
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Move Outs', color: '#6b7a94' },
+          grid: { color: 'rgba(42, 58, 92, 0.3)' }
+        }
+      }
+    }
+  });
+
+  // ===== CHART 2: March Daily Line Chart =====
+  const ma2024 = march2024.length > 0 ? movingAverage(march2024, 7) : [];
+  const ma2025 = march2025.length > 0 ? movingAverage(march2025, 7) : [];
+
+  const daysLabels = Array.from({length: 31}, (_, i) => i + 1);
+
+  // Determine "today" marker for March chart
+  const isMarchNow = (todayMonth === 2);
+  const marchTodayIndex = isMarchNow && todayYear === 2026 ? todayDay - 1 : null; // 0-indexed
+  const marchAnnotations = {};
+  if (marchTodayIndex !== null && marchTodayIndex >= 0 && marchTodayIndex < 31) {
+    marchAnnotations.todayLine = {
+      type: 'line',
+      xMin: marchTodayIndex,
+      xMax: marchTodayIndex,
+      borderColor: 'rgba(239, 83, 80, 0.7)',
+      borderWidth: 2,
+      borderDash: [4, 4],
+      label: {
+        display: true,
+        content: 'Today (3/' + todayDay + ')',
+        position: 'start',
+        backgroundColor: 'rgba(239, 83, 80, 0.85)',
+        color: '#fff',
+        font: { size: 10, weight: '600' },
+        padding: { top: 4, bottom: 4, left: 8, right: 8 },
+        borderRadius: 4
+      }
+    };
+  }
+
+  const marchDailyDatasets = [
+    {
+      label: '2024',
+      data: march2024,
+      borderColor: C2024,
+      backgroundColor: 'rgba(74, 144, 217, 0.1)',
+      borderWidth: 2,
+      pointRadius: 3,
+      pointHoverRadius: 6,
+      fill: false,
+      tension: 0.1
+    },
+    {
+      label: '2025',
+      data: march2025,
+      borderColor: C2025,
+      backgroundColor: 'rgba(245, 166, 35, 0.1)',
+      borderWidth: 2,
+      pointRadius: 3,
+      pointHoverRadius: 6,
+      fill: false,
+      tension: 0.1
+    },
+    {
+      label: '2026',
+      data: march2026.concat(Array(Math.max(0, 31 - march2026.length)).fill(null)),
+      borderColor: C2026,
+      backgroundColor: 'rgba(126, 211, 33, 0.1)',
+      borderWidth: 3,
+      pointRadius: 5,
+      pointHoverRadius: 8,
+      fill: false,
+      tension: 0.1
+    }
+  ];
+
+  if (ma2024.length > 0) {
+    marchDailyDatasets.push({
+      label: '7d MA 2024',
+      data: ma2024,
+      borderColor: 'rgba(74, 144, 217, 0.4)',
+      borderWidth: 1.5,
+      borderDash: [6, 4],
+      pointRadius: 0,
+      fill: false,
+      tension: 0.3
+    });
+  }
+  if (ma2025.length > 0) {
+    marchDailyDatasets.push({
+      label: '7d MA 2025',
+      data: ma2025,
+      borderColor: 'rgba(245, 166, 35, 0.4)',
+      borderWidth: 1.5,
+      borderDash: [6, 4],
+      pointRadius: 0,
+      fill: false,
+      tension: 0.3
+    });
+  }
+
+  chartMarchDailyInst = new Chart(document.getElementById('chartMarchDaily'), {
+    type: 'line',
+    data: {
+      labels: daysLabels,
+      datasets: marchDailyDatasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        annotation: { annotations: marchAnnotations }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: 'Day of March', color: '#6b7a94' },
+          grid: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Move Outs', color: '#6b7a94' },
+          grid: { color: 'rgba(42, 58, 92, 0.3)' }
+        }
+      }
+    }
+  });
+
+  // ===== CHART 3: Cumulative March =====
+  const cum2024 = march2024.length > 0 ? cumulative(march2024) : [];
+  const cum2025 = march2025.length > 0 ? cumulative(march2025) : [];
+
+  const march2026_full = march2026.concat(Array(Math.max(0, 31 - march2026.length)).fill(null));
+  const cum2026 = [];
+  let sum26 = 0;
+  for (let i = 0; i < 31; i++) {
+    if (march2026_full[i] !== null) {
+      sum26 += march2026_full[i];
+      cum2026.push(sum26);
+    } else {
+      cum2026.push(null);
+    }
+  }
+
+  const cumAnnotations = {};
+  if (marchTodayIndex !== null && marchTodayIndex >= 0 && marchTodayIndex < 31) {
+    cumAnnotations.todayLine = {
+      type: 'line',
+      xMin: marchTodayIndex,
+      xMax: marchTodayIndex,
+      borderColor: 'rgba(239, 83, 80, 0.5)',
+      borderWidth: 1.5,
+      borderDash: [4, 4],
+      label: {
+        display: true,
+        content: '3/' + todayDay,
+        position: 'start',
+        backgroundColor: 'rgba(239, 83, 80, 0.8)',
+        color: '#fff',
+        font: { size: 9 },
+        padding: 4,
+        borderRadius: 3
+      }
+    };
+  }
+
+  chartCumulativeInst = new Chart(document.getElementById('chartCumulative'), {
+    type: 'line',
+    data: {
+      labels: daysLabels,
+      datasets: [
+        {
+          label: '2024 Cumulative',
+          data: cum2024,
+          borderColor: C2024,
+          backgroundColor: 'rgba(74, 144, 217, 0.08)',
+          borderWidth: 2.5,
+          pointRadius: 1,
+          pointHoverRadius: 5,
+          fill: true,
+          tension: 0.2
+        },
+        {
+          label: '2025 Cumulative',
+          data: cum2025,
+          borderColor: C2025,
+          backgroundColor: 'rgba(245, 166, 35, 0.08)',
+          borderWidth: 2.5,
+          pointRadius: 1,
+          pointHoverRadius: 5,
+          fill: true,
+          tension: 0.2
+        },
+        {
+          label: '2026 Cumulative',
+          data: cum2026,
+          borderColor: C2026,
+          backgroundColor: 'rgba(126, 211, 33, 0.12)',
+          borderWidth: 3,
+          pointRadius: 5,
+          pointHoverRadius: 8,
+          fill: true,
+          tension: 0.2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top' },
+        annotation: { annotations: cumAnnotations },
+        tooltip: {
+          callbacks: {
+            afterBody: function(tooltipItems) {
+              const idx = tooltipItems[0].dataIndex;
+              if (cum2024[idx] && cum2025[idx]) {
+                const diff = cum2025[idx] - cum2024[idx];
+                return '\n2025 vs 2024: ' + (diff >= 0 ? '+' : '') + diff;
+              }
+              return '';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: { display: true, text: 'Day of March', color: '#6b7a94' },
+          grid: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Cumulative Move Outs', color: '#6b7a94' },
+          grid: { color: 'rgba(42, 58, 92, 0.3)' }
+        }
+      }
+    }
+  });
+
+  // ===== CHART 4: Monthly Daily Average =====
+  chartDailyAvgInst = new Chart(document.getElementById('chartDailyAvg'), {
+    type: 'line',
+    data: {
+      labels: MONTHS,
+      datasets: [
+        {
+          label: '2024 Avg/Day',
+          data: avgDay2024,
+          borderColor: C2024,
+          backgroundColor: 'rgba(74, 144, 217, 0.1)',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointHoverRadius: 7,
+          pointBackgroundColor: C2024,
+          fill: false,
+          tension: 0.3
+        },
+        {
+          label: '2025 Avg/Day',
+          data: avgDay2025,
+          borderColor: C2025,
+          backgroundColor: 'rgba(245, 166, 35, 0.1)',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointHoverRadius: 7,
+          pointBackgroundColor: C2025,
+          fill: false,
+          tension: 0.3
+        },
+        {
+          label: '2026 Avg/Day',
+          data: avgDay2026,
+          borderColor: C2026,
+          backgroundColor: 'rgba(126, 211, 33, 0.1)',
+          borderWidth: 2.5,
+          pointRadius: 5,
+          pointHoverRadius: 8,
+          pointBackgroundColor: C2026,
+          fill: false,
+          tension: 0.3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              if (ctx.parsed.y === null) return '';
+              return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + ' / day';
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false } },
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Move Outs per Day', color: '#6b7a94' },
+          grid: { color: 'rgba(42, 58, 92, 0.3)' }
+        }
+      }
+    }
+  });
+
+  // ===== CHART 5: Move Out Rate (% of Total Rooms) =====
+  // Update the unit count labels
+  document.getElementById('unitCount2024').textContent = TOTAL_UNITS[2024];
+  document.getElementById('unitCount2025').textContent = TOTAL_UNITS[2025];
+  document.getElementById('unitCount2026').textContent = TOTAL_UNITS[2026];
+
+  chartMoveOutRateInst = new Chart(document.getElementById('chartMoveOutRate'), {
+    type: 'bar',
+    data: {
+      labels: MONTHS,
+      datasets: [
+        {
+          label: '2024 Rate %',
+          data: rate2024,
+          backgroundColor: C2024_A,
+          borderColor: C2024,
+          borderWidth: 1,
+          borderRadius: 4,
+          barPercentage: 0.8,
+          categoryPercentage: 0.7
+        },
+        {
+          label: '2025 Rate %',
+          data: rate2025,
+          backgroundColor: C2025_A,
+          borderColor: C2025,
+          borderWidth: 1,
+          borderRadius: 4,
+          barPercentage: 0.8,
+          categoryPercentage: 0.7
+        },
+        {
+          label: '2026 Rate %',
+          data: rate2026,
+          backgroundColor: C2026_A,
+          borderColor: C2026,
+          borderWidth: 1,
+          borderRadius: 4,
+          barPercentage: 0.8,
+          categoryPercentage: 0.7
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top' },
+        annotation: {
+          annotations: {
+            avgLine2024: {
+              type: 'line',
+              yMin: parseFloat(avgRate2024) || 0,
+              yMax: parseFloat(avgRate2024) || 0,
+              borderColor: 'rgba(74, 144, 217, 0.4)',
+              borderWidth: 1.5,
+              borderDash: [6, 4],
+              label: {
+                display: true,
+                content: '2024 avg: ' + avgRate2024 + '%',
+                position: 'start',
+                backgroundColor: 'rgba(74, 144, 217, 0.7)',
+                color: '#fff',
+                font: { size: 9 },
+                padding: 3,
+                borderRadius: 3
+              }
+            },
+            avgLine2025: {
+              type: 'line',
+              yMin: parseFloat(avgRate2025) || 0,
+              yMax: parseFloat(avgRate2025) || 0,
+              borderColor: 'rgba(245, 166, 35, 0.4)',
+              borderWidth: 1.5,
+              borderDash: [6, 4],
+              label: {
+                display: true,
+                content: '2025 avg: ' + avgRate2025 + '%',
+                position: 'end',
+                backgroundColor: 'rgba(245, 166, 35, 0.7)',
+                color: '#fff',
+                font: { size: 9 },
+                padding: 3,
+                borderRadius: 3
+              }
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              if (ctx.parsed.y === null) return '';
+              return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '% of rooms';
+            },
+            afterBody: function(tooltipItems) {
+              const idx = tooltipItems[0].dataIndex;
+              const r24 = rate2024[idx];
+              const r25 = rate2025[idx];
+              if (r24 !== null && r25 !== null) {
+                const diff = (r25 - r24).toFixed(1);
+                return '\nRate change: ' + (diff > 0 ? '+' : '') + diff + ' pp';
+              }
+              return '';
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false } },
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Move Out Rate (% of Total Rooms)', color: '#6b7a94' },
+          grid: { color: 'rgba(42, 58, 92, 0.3)' },
+          ticks: {
+            callback: function(value) { return value + '%'; }
+          }
+        }
+      }
+    }
+  });
+
+  // ===== DATA TABLE: Monthly Comparison =====
+  const tbody = document.getElementById('tableMonthlyBody');
+  tbody.innerHTML = '';
+
+  let tableTotal24 = 0, tableTotal25 = 0, tableTotal26 = 0;
+
+  for (let i = 0; i < 12; i++) {
+    const v24 = data2024[i];
+    const v25 = data2025[i];
+    const v26 = data2026[i];
+    if (v24 !== null) tableTotal24 += v24;
+    if (v25 !== null) tableTotal25 += v25;
+    if (v26 !== null) tableTotal26 += v26;
+
+    let yoyChange = '';
+    let yoyClass = '';
+    let yoySign = '';
+    if (v24 !== null && v25 !== null && v24 > 0) {
+      yoyChange = ((v25 - v24) / v24 * 100).toFixed(1);
+      yoyClass = parseFloat(yoyChange) <= 0 ? 'cell-change-pos' : 'cell-change-neg';
+      yoySign = parseFloat(yoyChange) > 0 ? '+' : '';
+    }
+
+    let vs25 = '';
+    let vs25Class = '';
+    if (v26 !== null && v25 !== null) {
+      // Check if March or any month is partial for 2026
+      const dim26 = (DAYS_IN_MONTH_BY_YEAR[2026] || DAYS_IN_MONTH_BY_YEAR[2025])[i];
+      const isPartialMonth2026 = (lastDateObj.getFullYear() === 2026 && lastDateObj.getMonth() === i && lastDateObj.getDate() < dim26);
+      if (isPartialMonth2026) {
+        vs25 = 'partial';
+        vs25Class = 'neutral-text';
+      } else {
+        const ch = ((v26 - v25) / v25 * 100).toFixed(1);
+        vs25 = (parseFloat(ch) > 0 ? '+' : '') + ch + '%';
+        vs25Class = parseFloat(ch) <= 0 ? 'cell-change-pos' : 'cell-change-neg';
+      }
+    }
+
+    const a24 = avgDay2024[i];
+    const a25 = avgDay2025[i];
+    const a26 = avgDay2026[i];
+
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + MONTHS[i] + '</td>' +
+      '<td class="cell-2024">' + (v24 !== null ? v24 : '&mdash;') + '</td>' +
+      '<td class="cell-2025">' + (v25 !== null ? v25 : '&mdash;') + '</td>' +
+      '<td class="' + yoyClass + '">' + (yoyChange !== '' ? yoySign + yoyChange + '%' : '&mdash;') + '</td>' +
+      '<td class="cell-2026">' + (v26 !== null ? v26 : '&mdash;') + '</td>' +
+      '<td class="' + vs25Class + '">' + (vs25 || '&mdash;') + '</td>' +
+      '<td>' + (a24 !== null ? a24.toFixed(1) : '&mdash;') + '</td>' +
+      '<td>' + (a25 !== null ? a25.toFixed(1) : '&mdash;') + '</td>' +
+      '<td>' + (a26 !== null ? a26.toFixed(1) : '&mdash;') + '</td>';
+    tbody.appendChild(tr);
+  }
+
+  // Total row
+  const totalYoY = tableTotal24 > 0 ? ((tableTotal25 - tableTotal24) / tableTotal24 * 100).toFixed(1) : '0.0';
+  const totalYoYClass = parseFloat(totalYoY) <= 0 ? 'cell-change-pos' : 'cell-change-neg';
+  const totalYoYSign = parseFloat(totalYoY) > 0 ? '+' : '';
+  const avgAll24 = days2024 > 0 ? (tableTotal24 / days2024).toFixed(2) : '0.00';
+  const avgAll25 = days2025 > 0 ? (tableTotal25 / days2025).toFixed(2) : '0.00';
+  const avgAll26 = days2026 > 0 ? (tableTotal26 / days2026).toFixed(2) : '0.00';
+
+  const trTotal = document.createElement('tr');
+  trTotal.className = 'row-total';
+  trTotal.innerHTML =
+    '<td>TOTAL / AVG</td>' +
+    '<td class="cell-2024">' + tableTotal24 + '</td>' +
+    '<td class="cell-2025">' + tableTotal25 + '</td>' +
+    '<td class="' + totalYoYClass + '">' + totalYoYSign + totalYoY + '%</td>' +
+    '<td class="cell-2026">' + tableTotal26 + ' (YTD)</td>' +
+    '<td>&mdash;</td>' +
+    '<td>' + avgAll24 + '</td>' +
+    '<td>' + avgAll25 + '</td>' +
+    '<td>' + avgAll26 + '</td>';
+  tbody.appendChild(trTotal);
+
+  // ===== DATA TABLE: March Deep Dive =====
+  const tbodyMarch = document.getElementById('tableMarchBody');
+  tbodyMarch.innerHTML = '';
+
+  let mCum24 = 0, mCum25 = 0, mCum26 = 0;
+  const maxMarchDays = Math.max(march2024.length, march2025.length, 31);
+
+  for (let d = 0; d < 31; d++) {
+    const v24 = d < march2024.length ? march2024[d] : 0;
+    const v25 = d < march2025.length ? march2025[d] : 0;
+    const v26 = d < march2026.length ? march2026[d] : null;
+
+    mCum24 += v24;
+    mCum25 += v25;
+    if (v26 !== null) mCum26 += v26;
+
+    const tr = document.createElement('tr');
+    const dayNum = d + 1;
+
+    // "Today" marker uses actual current date
+    const isToday = (todayMonth === 2 && todayDay === dayNum && todayYear === 2026);
+    const hasPassed2026 = (d < march2026.length);
+
+    if (isToday) tr.classList.add('cell-today');
+
+    tr.innerHTML =
+      '<td>' + '3/' + dayNum + (isToday ? ' (Today)' : '') + '</td>' +
+      '<td class="cell-2024">' + (d < march2024.length ? v24 : '&mdash;') + '</td>' +
+      '<td class="cell-2025">' + (d < march2025.length ? v25 : '&mdash;') + '</td>' +
+      '<td class="cell-2026">' + (v26 !== null ? v26 : '&mdash;') + '</td>' +
+      '<td class="cell-2024">' + (d < march2024.length ? mCum24 : '&mdash;') + '</td>' +
+      '<td class="cell-2025">' + (d < march2025.length ? mCum25 : '&mdash;') + '</td>' +
+      '<td class="cell-2026">' + (hasPassed2026 ? mCum26 : '&mdash;') + '</td>';
+    tbodyMarch.appendChild(tr);
+  }
+
+  // March total row
+  const marchTotal24 = march2024.reduce((a, b) => a + b, 0);
+  const marchTotal25 = march2025.reduce((a, b) => a + b, 0);
+  const marchTotal26 = march2026.reduce((a, b) => a + b, 0);
+
+  const trMarchTotal = document.createElement('tr');
+  trMarchTotal.className = 'row-total';
+  trMarchTotal.innerHTML =
+    '<td>TOTAL</td>' +
+    '<td class="cell-2024">' + marchTotal24 + '</td>' +
+    '<td class="cell-2025">' + marchTotal25 + '</td>' +
+    '<td class="cell-2026">' + marchTotal26 + ' (' + march2026.length + ' days)</td>' +
+    '<td class="cell-2024">' + marchTotal24 + '</td>' +
+    '<td class="cell-2025">' + marchTotal25 + '</td>' +
+    '<td class="cell-2026">' + marchTotal26 + '</td>';
+  tbodyMarch.appendChild(trMarchTotal);
+
+  // Update footer
+  document.getElementById('footerText').innerHTML =
+    'CrossOver / TKNY Management &mdash; Move Out YoY Analysis &mdash; ' +
+    (data.isLive ? 'Live data' : 'Static data') + ' &mdash; Rendered ' +
+    new Date().toISOString().slice(0, 10);
+}
+
+// ===================================================================
+// STATUS BAR MANAGEMENT
+// ===================================================================
+function updateStatusBar(isLive, timestamp) {
+  const dot = document.getElementById('statusDot');
+  const label = document.getElementById('statusLabel');
+  const time = document.getElementById('statusTime');
+
+  if (isLive) {
+    dot.className = 'status-dot live';
+    label.className = 'status-label live';
+    label.textContent = 'LIVE';
+  } else {
+    dot.className = 'status-dot static';
+    label.className = 'status-label static';
+    label.textContent = 'STATIC (cached data)';
+  }
+
+  if (timestamp) {
+    time.textContent = 'Last refreshed: ' + timestamp.toLocaleTimeString('en-US', {
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+  }
+}
+
+function setRefreshing(isRefreshing) {
+  const btn = document.getElementById('refreshBtn');
+  const icon = document.getElementById('refreshIcon');
+  if (isRefreshing) {
+    btn.disabled = true;
+    icon.className = 'spin';
+    icon.innerHTML = '&#x21bb;';
+  } else {
+    btn.disabled = false;
+    icon.className = '';
+    icon.innerHTML = '&#x21bb;';
+  }
+}
+
+// ===================================================================
+// REFRESH DATA
+// ===================================================================
+async function refreshData() {
+  setRefreshing(true);
+  try {
+    const data = await fetchSheetData();
+    renderDashboard(data);
+    updateStatusBar(true, new Date());
+    console.log('[MoveOut Dashboard] Live data loaded successfully');
+  } catch (err) {
+    console.warn('[MoveOut Dashboard] Fetch failed, using fallback data:', err.message);
+    renderDashboard(FALLBACK_DATA);
+    updateStatusBar(false, new Date());
+  }
+  setRefreshing(false);
+}
+
+// ===================================================================
+// INIT
+// ===================================================================
+(async function init() {
+  // Initial render with fallback while loading
+  await refreshData();
+
+  // Auto-refresh every 5 minutes
+  setInterval(refreshData, 5 * 60 * 1000);
+})();
+</script>
+
+</body>
+</html>
