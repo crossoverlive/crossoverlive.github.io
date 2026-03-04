@@ -670,8 +670,8 @@ tbody tr:hover {
     <div class="chart-container">
       <h3>Move Out Rate (% of Total Rooms) &mdash; Normalizing for Portfolio Growth</h3>
       <div style="font-size:11px; color:#6b7a94; margin-bottom:12px;">
-        Total rooms: 2024 ≈ <span id="unitCount2024">140</span> &nbsp;|&nbsp; 2025 ≈ <span id="unitCount2025">155</span> &nbsp;|&nbsp; 2026 ≈ <span id="unitCount2026">159</span>
-        &nbsp;&nbsp;<span style="opacity:0.6">(configurable)</span>
+        Monthly room counts from Booking Calendar: 2024 = <span id="unitCount2024">165</span> &nbsp;|&nbsp; 2025 = <span id="unitCount2025">157–165</span> &nbsp;|&nbsp; 2026 = <span id="unitCount2026">159</span>
+        &nbsp;&nbsp;<span style="opacity:0.6">(per-month from BC sheets)</span>
       </div>
       <div class="chart-wrapper bar-chart">
         <canvas id="chartMoveOutRate"></canvas>
@@ -748,14 +748,24 @@ const C2026_A = 'rgba(126, 211, 33, 0.7)';
 
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMsC-_Dyf60_scQn-OZH3OZXF8xS-NqsG7QCRpjtd9Masy9b65NtkNDEMaCiyE0JjHKccLx2N-AANh/pub?gid=359503005&single=true&output=csv';
 
-// Total rooms/units in portfolio by year (estimated)
-// Used to calculate Move Out Rate (%) for fair YoY comparison
-// Update these values as portfolio grows
-const TOTAL_UNITS = {
-  2024: 140,  // estimated — check older BC sheets for exact count
-  2025: 155,  // estimated — check BC 12/25 sheet for exact count
-  2026: 159   // confirmed: BC Mar 26, row 345 "Total # of Airbnb Listings"
+// Monthly total rooms (Airbnb Listings) from Booking Calendar sheets
+// Confirmed: Oct24=165, Dec24=165, Mar25=165, Jun25=162, Aug25=161, Sep25=157, Mar26=159
+// Jan-Sep 2024: extrapolated from Oct 2024 (165); intermediate months interpolated
+const MONTHLY_ROOMS = {
+  '2024-01': 165, '2024-02': 165, '2024-03': 165, '2024-04': 165,
+  '2024-05': 165, '2024-06': 165, '2024-07': 165, '2024-08': 165,
+  '2024-09': 165, '2024-10': 165, '2024-11': 165, '2024-12': 165,
+  '2025-01': 165, '2025-02': 165, '2025-03': 165, '2025-04': 164,
+  '2025-05': 163, '2025-06': 162, '2025-07': 162, '2025-08': 161,
+  '2025-09': 157, '2025-10': 158, '2025-11': 158, '2025-12': 158,
+  '2026-01': 159, '2026-02': 159, '2026-03': 159
 };
+function getRoomCount(year, monthIdx) { // monthIdx: 0=Jan..11=Dec
+  const key = year + '-' + String(monthIdx + 1).padStart(2, '0');
+  return MONTHLY_ROOMS[key] || 159; // fallback to latest known
+}
+// Legacy accessor (avg for display)
+const TOTAL_UNITS = { 2024: 165, 2025: 161, 2026: 159 };
 
 // Chart.js defaults
 Chart.defaults.color = '#a0aec0';
@@ -1070,9 +1080,9 @@ function renderDashboard(data) {
   ytdDetail = ytdParts.join(' + ');
 
   // ===== MOVE OUT RATE (% of Total Rooms) — calculated before KPIs =====
-  const rate2024 = data2024.map(v => v !== null ? parseFloat((v / TOTAL_UNITS[2024] * 100).toFixed(1)) : null);
-  const rate2025 = data2025.map(v => v !== null ? parseFloat((v / TOTAL_UNITS[2025] * 100).toFixed(1)) : null);
-  const rate2026 = data2026.map(v => v !== null ? parseFloat((v / TOTAL_UNITS[2026] * 100).toFixed(1)) : null);
+  const rate2024 = data2024.map((v, i) => v !== null ? parseFloat((v / getRoomCount(2024, i) * 100).toFixed(1)) : null);
+  const rate2025 = data2025.map((v, i) => v !== null ? parseFloat((v / getRoomCount(2025, i) * 100).toFixed(1)) : null);
+  const rate2026 = data2026.map((v, i) => v !== null ? parseFloat((v / getRoomCount(2026, i) * 100).toFixed(1)) : null);
 
   const validRate2024 = rate2024.filter(v => v !== null);
   const validRate2025 = rate2025.filter(v => v !== null);
@@ -1114,7 +1124,7 @@ function renderDashboard(data) {
     <div class="kpi-card c2024">
       <div class="kpi-label">Avg Monthly Rate 2024</div>
       <div class="kpi-value c2024">${avgRate2024}%</div>
-      <div class="kpi-detail">Move Outs per month / ${TOTAL_UNITS[2024]} rooms</div>
+      <div class="kpi-detail">Move Outs / monthly room count (165)</div>
     </div>
     <div class="kpi-card c2025">
       <div class="kpi-label">Avg Monthly Rate 2025</div>
@@ -1496,10 +1506,10 @@ function renderDashboard(data) {
   });
 
   // ===== CHART 5: Move Out Rate (% of Total Rooms) =====
-  // Update the unit count labels
-  document.getElementById('unitCount2024').textContent = TOTAL_UNITS[2024];
-  document.getElementById('unitCount2025').textContent = TOTAL_UNITS[2025];
-  document.getElementById('unitCount2026').textContent = TOTAL_UNITS[2026];
+  // Update the unit count labels (show range for 2025)
+  document.getElementById('unitCount2024').textContent = '165';
+  document.getElementById('unitCount2025').textContent = '157–165';
+  document.getElementById('unitCount2026').textContent = '159';
 
   chartMoveOutRateInst = new Chart(document.getElementById('chartMoveOutRate'), {
     type: 'bar',
@@ -1588,7 +1598,9 @@ function renderDashboard(data) {
           callbacks: {
             label: function(ctx) {
               if (ctx.parsed.y === null) return '';
-              return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '% of rooms';
+              const yr = ctx.dataset.label === '2024' ? 2024 : ctx.dataset.label === '2025' ? 2025 : 2026;
+              const rooms = getRoomCount(yr, ctx.dataIndex);
+              return ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) + '% (' + rooms + ' rooms)';
             },
             afterBody: function(tooltipItems) {
               const idx = tooltipItems[0].dataIndex;
