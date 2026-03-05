@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Gramercy Park Project</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #F2EDE3;
+      --warm-white: #FAF8F4;
+      --ink: #1C1C1A;
+      --mid: #4A4A42;
+      --light: #8A8A7A;
+      --accent: #8B7355;
+      --border: #DDD8CE;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background: var(--warm-white);
+      color: var(--ink);
+      line-height: 1.75;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 18px 48px;
+      background: rgba(250,248,244,0.94);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mid); }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+      text-decoration: none; color: var(--mid); transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--ink); }
+
+    /* BUTTONS */
+    .btn-light {
+      display: inline-block; padding: 14px 32px;
+      background: rgba(250,248,244,0.95); color: var(--ink);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-light:hover { background: #fff; }
+    .btn-ghost {
+      display: inline-block; padding: 14px 32px;
+      border: 1px solid rgba(250,248,244,0.4); color: rgba(250,248,244,0.82);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+      text-decoration: none; transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover { border-color: rgba(250,248,244,0.8); color: #FAF8F4; }
+    .btn-dark {
+      display: block; padding: 15px 32px; margin-bottom: 12px; text-align: center;
+      background: var(--ink); color: #FAF8F4;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+      text-decoration: none; transition: background 0.2s;
+    }
+    .btn-dark:hover { background: #2C2C28; }
+    .btn-outline {
+      display: block; padding: 15px 32px; text-align: center;
+      border: 1px solid var(--border); color: var(--mid);
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+      text-decoration: none; transition: border-color 0.2s;
+    }
+    .btn-outline:hover { border-color: var(--mid); color: var(--ink); }
+
+    .label {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 14px; display: block;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 140px 72px 100px; overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: url('images/eb-lifestyle-photo.png') center center / cover no-repeat;
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        115deg,
+        rgba(18,18,16,0.78) 0%,
+        rgba(18,18,16,0.55) 55%,
+        rgba(18,18,16,0.30) 100%
+      );
+    }
+    .hero-content { position: relative; max-width: 620px; }
+    .hero-tag {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase;
+      color: rgba(200,180,150,0.9); margin-bottom: 28px;
+    }
+    .hero h1 {
+      font-size: clamp(36px, 5.2vw, 66px); font-weight: 400;
+      line-height: 1.1; color: #FAF8F4; margin-bottom: 22px;
+    }
+    .hero .tagline {
+      font-size: 17px; color: rgba(250,248,244,0.68);
+      font-style: italic; max-width: 440px; margin-bottom: 10px;
+    }
+    .hero .sub {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 12px; color: rgba(250,248,244,0.52);
+      margin-bottom: 44px; max-width: 400px; line-height: 1.6;
+    }
+    .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
+
+    /* ── THE THIRD OPTION ── */
+    .third { background: var(--cream); padding: 96px 72px; }
+    .third-inner { max-width: 1080px; margin: 0 auto; }
+    .third h2 {
+      font-size: clamp(26px, 3.2vw, 44px); font-weight: 400;
+      margin-bottom: 64px; max-width: 560px; line-height: 1.2;
+    }
+    .third-grid { display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: 2px; }
+    .third-card { padding: 40px 30px; background: var(--warm-white); }
+    .third-card.mid { background: var(--ink); color: #FAF8F4; }
+    .third-type {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--light); margin-bottom: 18px;
+    }
+    .third-card.mid .third-type { color: rgba(250,248,244,0.45); }
+    .third-card h3 { font-size: 20px; font-weight: 400; margin-bottom: 12px; }
+    .third-card p { font-size: 14px; color: var(--mid); line-height: 1.65; }
+    .third-card.mid p { color: rgba(250,248,244,0.65); }
+
+    /* ── PHILOSOPHY ── */
+    .philosophy { display: grid; grid-template-columns: 1fr 1fr; min-height: 560px; }
+    .phil-text {
+      padding: 96px 64px; background: var(--warm-white);
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .phil-text blockquote {
+      font-size: clamp(17px, 2vw, 23px); font-style: italic; font-weight: 400;
+      line-height: 1.68; color: var(--mid); margin: 0 0 28px;
+    }
+    .phil-text .src {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--light);
+    }
+    .phil-image { overflow: hidden; }
+    .phil-image img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; }
+
+    /* ── TIMELINE GRAPH ── */
+    .timeline-graph-section { background: var(--cream); padding: 96px 72px; }
+    .timeline-graph-inner { max-width: 1080px; margin: 0 auto; }
+    .timeline-graph-inner h2 {
+      font-size: clamp(26px, 3.2vw, 44px); font-weight: 400; margin-bottom: 12px;
+    }
+    .timeline-graph-inner .sub-note {
+      font-size: 15px; color: var(--mid); font-style: italic; margin-bottom: 48px;
+    }
+    .graph-img {
+      width: 100%; border-radius: 0;
+      box-shadow: 0 2px 40px rgba(0,0,0,0.07);
+    }
+
+    /* ── TIMELINE DETAIL ── */
+    .timeline-detail-section { background: #E4E0D6; padding: 80px 72px; }
+    .timeline-detail-inner { max-width: 1080px; margin: 0 auto; }
+    .timeline-detail-inner img {
+      width: 100%; display: block; border-radius: 2px;
+      box-shadow: 0 8px 56px rgba(0,0,0,0.16), 0 2px 14px rgba(0,0,0,0.09);
+    }
+
+    /* ── EDITED FOR LIVING CONTEXT ── */
+    .edited { padding: 96px 0; background: var(--warm-white); }
+    .edited-header {
+      padding: 0 72px; margin: 0 auto 40px;
+      display: flex; align-items: flex-end; justify-content: space-between;
+      flex-wrap: wrap; gap: 24px;
+    }
+    .edited-header-left h2 { font-size: clamp(26px, 3.2vw, 44px); font-weight: 400; margin-bottom: 12px; }
+    .edited-header-left .desc { font-size: 15px; color: var(--mid); max-width: 480px; }
+    .slider-controls { display: flex; gap: 8px; align-items: center; }
+    .slider-btn {
+      width: 44px; height: 44px; border: 1px solid var(--border); background: none;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; color: var(--mid); font-size: 18px; line-height: 1;
+    }
+    .slider-btn:hover:not(:disabled) { border-color: var(--ink); color: var(--ink); }
+    .slider-btn:disabled { opacity: 0.3; cursor: default; }
+    .slider-outer { overflow: hidden; }
+    .slider-track {
+      display: flex; gap: 2px;
+      overflow-x: scroll; scroll-snap-type: x mandatory; scroll-behavior: smooth;
+      padding: 0 72px; -ms-overflow-style: none; scrollbar-width: none;
+    }
+    .slider-track::-webkit-scrollbar { display: none; }
+    .slider-card {
+      flex: 0 0 360px; background: var(--cream); overflow: hidden;
+      cursor: pointer; scroll-snap-align: start; transition: opacity 0.2s;
+    }
+    .slider-card:hover { opacity: 0.9; }
+    .sc-img { aspect-ratio: 4/5; overflow: hidden; position: relative; background: var(--cream); }
+    .sc-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s; }
+    .slider-card:hover .sc-img img { transform: scale(1.04); }
+    .sc-hint {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(28,28,26,0.55));
+      padding: 32px 18px 14px;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(250,248,244,0.85); text-align: right;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .slider-card:hover .sc-hint { opacity: 1; }
+    .sc-info { padding: 20px 22px 28px; }
+    .sc-name { font-size: 16px; font-weight: 400; margin-bottom: 6px; }
+    .sc-note { font-size: 13px; color: var(--mid); line-height: 1.55; }
+    .sc-quiet {
+      font-size: 12px; font-style: italic; color: var(--accent);
+      margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+    }
+    .slider-dots { display: flex; gap: 7px; justify-content: center; padding: 28px 72px 0; }
+    .slider-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--border); border: none; cursor: pointer; padding: 0;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .slider-dot.active { background: var(--ink); transform: scale(1.3); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(28,28,26,0.72); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; padding: 24px;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      background: var(--warm-white); max-width: 800px; width: 100%;
+      display: grid; grid-template-columns: 5fr 6fr; position: relative;
+      max-height: 90vh; overflow: hidden;
+      transform: translateY(20px); transition: transform 0.3s;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0); }
+    .modal-img { overflow: hidden; }
+    .modal-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .modal-body { padding: 52px 44px; display: flex; flex-direction: column; overflow-y: auto; }
+    .modal-meta {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 18px;
+    }
+    .modal-name { font-size: clamp(24px, 3vw, 36px); font-weight: 400; margin-bottom: 22px; line-height: 1.15; }
+    .modal-desc { font-size: 15px; color: var(--mid); line-height: 1.72; margin-bottom: 20px; }
+    .modal-quiet {
+      font-size: 13px; font-style: italic; color: var(--accent);
+      padding: 20px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      margin-bottom: 36px;
+    }
+    .modal-link {
+      display: inline-block; align-self: flex-start; padding: 13px 28px;
+      background: var(--ink); color: #FAF8F4;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+      text-decoration: none; transition: background 0.2s;
+    }
+    .modal-link:hover { background: #2C2C28; }
+    .modal-close {
+      position: absolute; top: 16px; right: 20px;
+      background: none; border: none; cursor: pointer;
+      font-size: 26px; color: var(--mid); line-height: 1;
+      font-family: 'Helvetica Neue', Arial, sans-serif; font-weight: 300;
+      transition: color 0.2s; z-index: 1;
+    }
+    .modal-close:hover { color: var(--ink); }
+
+    /* ── UNIT PHOTOS ── */
+    .unit-section { padding: 0; }
+    .unit-header { padding: 80px 72px 40px; }
+    .unit-header h2 { font-size: clamp(22px, 2.8vw, 38px); font-weight: 400; }
+    .unit-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; }
+    .unit-img { aspect-ratio: 2/3; overflow: hidden; }
+    .unit-img img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; transition: transform 0.6s; }
+    .unit-img:hover img { transform: scale(1.04); }
+
+    /* ── MONITOR ── */
+    .monitor { background: var(--cream); padding: 96px 72px; }
+    .monitor-inner { max-width: 1080px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+    .monitor-left h2 { font-size: clamp(22px, 2.8vw, 38px); font-weight: 400; margin-bottom: 16px; }
+    .monitor-left p { font-size: 15px; color: var(--mid); margin-bottom: 36px; }
+    .steps { list-style: none; }
+    .step {
+      display: flex; gap: 18px; padding: 18px 0;
+      border-bottom: 1px solid var(--border); font-size: 14px; color: var(--mid);
+    }
+    .step:last-child { border-bottom: none; }
+    .step-n {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 11px; letter-spacing: 0.1em; color: var(--accent); min-width: 24px; padding-top: 2px;
+    }
+    .monitor-right { background: var(--ink); padding: 48px; color: #FAF8F4; }
+    .monitor-right h3 { font-size: 22px; font-weight: 400; margin-bottom: 16px; line-height: 1.3; }
+    .monitor-right p { font-size: 14px; color: rgba(250,248,244,0.62); line-height: 1.7; margin-bottom: 28px; }
+    .monitor-right .linen-img { width: 100%; margin-top: 28px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 28px; }
+    .monitor-right .linen-img img { width: 100%; display: block; object-fit: cover; height: 160px; }
+
+    /* ── DETAILS ── */
+    .details { padding: 96px 72px; background: var(--warm-white); }
+    .details-inner { max-width: 1080px; margin: 0 auto; }
+    .details-inner h2 { font-size: clamp(26px, 3.2vw, 44px); font-weight: 400; margin-bottom: 52px; }
+    .details-grid { display: grid; grid-template-columns: 1fr; gap: 64px; align-items: start; max-width: 560px; margin: 0 auto; }
+    .floorplan-img { width: 100%; display: block; border: 1px solid var(--border); }
+    .detail-rows { margin-bottom: 36px; }
+    .row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+    }
+    .row:first-child { border-top: 1px solid var(--border); }
+    .row-label {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--light);
+    }
+    .price { font-size: clamp(42px, 5.5vw, 64px); font-weight: 400; line-height: 1; margin-bottom: 6px; }
+    .price-sub { font-size: 13px; color: var(--light); margin-bottom: 28px; }
+    .details-note { font-size: 14px; color: var(--mid); line-height: 1.65; margin-bottom: 28px; }
+
+    /* ── CTA FOOTER ── */
+    .cta-footer {
+      position: relative; min-height: 55vh; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 120px 48px;
+    }
+    .cta-bg {
+      position: absolute; inset: 0;
+      background: url('images/eb-ceramic.png') center 35% / cover no-repeat;
+    }
+    .cta-overlay { position: absolute; inset: 0; background: rgba(18,18,16,0.74); }
+    .cta-inner { position: relative; color: #FAF8F4; }
+    .cta-inner h2 {
+      font-size: clamp(28px, 4.5vw, 56px); font-weight: 400;
+      line-height: 1.18; margin-bottom: 14px;
+    }
+    .cta-inner p {
+      font-size: 16px; color: rgba(250,248,244,0.58);
+      margin-bottom: 44px; font-style: italic;
+    }
+    .cta-btns { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 28px 48px; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 10px; letter-spacing: 0.12em; color: var(--light);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .hero { padding: 100px 28px 72px; }
+      .third { padding: 72px 28px; }
+      .third-grid { grid-template-columns: 1fr; }
+      .philosophy { grid-template-columns: 1fr; }
+      .phil-image { min-height: 300px; }
+      .timeline-graph-section, .monitor, .details { padding: 72px 28px; }
+      .timeline-detail-section { padding: 64px 28px; }
+      .edited { padding: 72px 0; }
+      .edited-header { padding: 0 28px; }
+      .slider-track { padding: 0 28px; }
+      .slider-dots { padding: 24px 28px 0; }
+      .slider-card { flex: 0 0 300px; }
+      .modal-box { grid-template-columns: 1fr; max-width: 420px; }
+      .modal-img { aspect-ratio: 4/3; max-height: 220px; }
+      .modal-body { padding: 36px 28px; }
+      .unit-grid { grid-template-columns: repeat(2, 1fr); }
+      .unit-header { padding: 64px 28px 32px; }
+      .monitor-inner { grid-template-columns: 1fr; gap: 40px; }
+      .details-grid { grid-template-columns: 1fr; gap: 40px; }
+      footer { flex-direction: column; gap: 8px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">The Gramercy Park Project</div>
+  <ul class="nav-links">
+    <li><a href="#the-space">The Space</a></li>
+    <li><a href="#timeline">Experience</a></li>
+    <li><a href="#curation">Curation</a></li>
+    <li><a href="#monitor">Monitor Program</a></li>
+    <li><a href="#details">Details</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1>Elevating New York Monthly Living.</h1>
+    <p class="tagline">Not a hotel. Not a rental. A new base for living defined by "quiet differences."</p>
+    <p class="sub">Focus on the experience of living comfort, not just the products.</p>
+    <div class="hero-cta">
+      <a href="#details" class="btn-light">Check Availability</a>
+      <a href="#monitor" class="btn-ghost">Apply for Monitor Program</a>
+    </div>
+  </div>
+</section>
+
+<!-- THE THIRD OPTION -->
+<section class="third">
+  <div class="third-inner">
+    <span class="label">The Problem</span>
+    <h2>Beyond the transient hotel<br>and the empty lease.</h2>
+    <div class="third-grid">
+      <div class="third-card">
+        <div class="third-type">The Hotel</div>
+        <h3>Transient &amp; Sterile.</h3>
+        <p>A temporary stopover lacking the rhythm of daily life. You cannot build a rhythm. Novelty wears off.</p>
+      </div>
+      <div class="third-card mid">
+        <div class="third-type">The Third Option</div>
+        <h3>The Gramercy Park Project.</h3>
+        <p>Completed Living. Arrival means life begins immediately. A monthly rental offering a fully resolved home from Day 1.</p>
+      </div>
+      <div class="third-card">
+        <div class="third-type">The Lease</div>
+        <h3>Permanent &amp; High Friction.</h3>
+        <p>An empty box requiring logistics, setup time, and long-term commitment. Rentals require immense setup effort.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PHILOSOPHY -->
+<section class="philosophy">
+  <div class="phil-text">
+    <span class="label">The Philosophy of Shitsurae</span>
+    <blockquote>
+      "True comfort is not found in grand gestures or symbolic luxury. It is found in the micro-interactions of daily life: the texture of a towel, the ergonomics of a chair, the tactile feedback of a toaster."
+    </blockquote>
+    <div class="src">The accumulation of quiet differences.</div>
+  </div>
+  <div class="phil-image">
+    <img src="images/eb-hero.png" alt="Hands holding coffee mug with linen, morning window light" />
+  </div>
+</section>
+
+<!-- TIMELINE GRAPH -->
+<section id="timeline" class="timeline-graph-section">
+  <div class="timeline-graph-inner">
+    <span class="label">The Experience</span>
+    <h2>The Timeline of Comfort.</h2>
+    <p class="sub-note">Value increases as the resident settles in. Unlike the hotel, this space grows with you.</p>
+    <img class="graph-img" src="images/eb-timeline-graph.png" alt="Timeline of Comfort graph — Completed Living vs Typical Hotel" />
+  </div>
+</section>
+
+<!-- TIMELINE DETAIL -->
+<section class="timeline-detail-section">
+  <div class="timeline-detail-inner">
+    <img src="images/eb-timeline-detail.png" alt="Timeline: Day 0 Arrival, Day 7 Work, Day 30 Routine, Day 90 Departure" />
+  </div>
+</section>
+
+<!-- EDITED FOR LIVING CONTEXT -->
+<section id="curation" class="edited">
+  <div class="edited-header">
+    <div class="edited-header-left">
+      <span class="label">Edited for Living Context</span>
+      <h2>Curating for behavior,<br>not just display.</h2>
+      <p class="desc">We do not select based on brand hype. We select based on how an object integrates into the flow of life.</p>
+    </div>
+    <div class="slider-controls">
+      <button class="slider-btn" id="sliderPrev" aria-label="Previous">&#8592;</button>
+      <button class="slider-btn" id="sliderNext" aria-label="Next">&#8594;</button>
+    </div>
+  </div>
+  <div class="slider-outer">
+    <div class="slider-track" id="sliderTrack">
+
+      <div class="slider-card"
+        data-name="Okamura"
+        data-category="Workspace · Ergonomics"
+        data-img="images/eb-product-okamura.png"
+        data-detail="Okamura's seating philosophy begins with the body in motion. Designed in Japan, refined through decades of workplace research, the Contessa chair supports posture across the full arc of a working day. The measure of great ergonomics is not what you feel — it is what you no longer notice."
+        data-quiet="The chair disappears. Only the work remains."
+        data-link="https://www.okamura.com">
+        <div class="sc-img">
+          <img src="images/eb-product-okamura.png" alt="Okamura" />
+          <div class="sc-hint">View Details →</div>
+        </div>
+        <div class="sc-info">
+          <div class="sc-name">Okamura</div>
+          <p class="sc-note">Supporting long hours of thought and creation. Ergonomics that allow the user to forget their environment.</p>
+          <div class="sc-quiet">The chair disappears. Only the work remains.</div>
+        </div>
+      </div>
+
+      <div class="slider-card"
+        data-name="TOTO"
+        data-category="Bathroom · Hygiene Standard"
+        data-img="images/eb-product-toto.png"
+        data-detail="TOTO's Washlet represents over four decades of refinement in personal hygiene. What begins as a curiosity becomes, within days, a non-negotiable standard. The integration of warmth, precision, and cleanliness resets your baseline — and once reset, it cannot be undone."
+        data-quiet="Noticed only by its absence elsewhere."
+        data-link="https://www.toto.com">
+        <div class="sc-img">
+          <img src="images/eb-product-toto.png" alt="TOTO" />
+          <div class="sc-hint">View Details →</div>
+        </div>
+        <div class="sc-info">
+          <div class="sc-name">TOTO</div>
+          <p class="sc-note">Essential hygiene standard. The quiet difference that becomes indispensable within the first week of living.</p>
+          <div class="sc-quiet">Noticed only by its absence elsewhere.</div>
+        </div>
+      </div>
+
+      <div class="slider-card"
+        data-name="UCHINO"
+        data-category="Bath · Textile"
+        data-img="images/eb-product-uchino.png"
+        data-detail="Founded in 1949 in Imabari, Japan — the world's foremost towel-producing region — UCHINO has refined the cotton weave across generations. Their Marshmallow Gauze collection balances softness with rapid absorption. The towel, like all great tools, should be felt rather than described."
+        data-quiet="The texture of a morning ritual."
+        data-link="https://www.uchino.co.jp/en">
+        <div class="sc-img">
+          <img src="images/eb-product-uchino.png" alt="UCHINO" />
+          <div class="sc-hint">View Details →</div>
+        </div>
+        <div class="sc-info">
+          <div class="sc-name">UCHINO</div>
+          <p class="sc-note">Japanese towel artisanship. The sensory moment that signals transition from sleep to wakefulness.</p>
+          <div class="sc-quiet">The texture of a morning ritual.</div>
+        </div>
+      </div>
+
+      <div class="slider-card"
+        data-name="BALMUDA"
+        data-category="Kitchen · Atmosphere"
+        data-img="images/eb-product-balmuda.png"
+        data-detail="BALMUDA designs appliances around the experience of use rather than the feature list. Their steam toaster produces bread with a crust and interior indistinguishable from the bakery. In a space designed for sustained living, BALMUDA transforms the kitchen into a place worth returning to."
+        data-quiet="The ritual, not just the result."
+        data-link="https://www.balmuda.com/en">
+        <div class="sc-img">
+          <img src="images/eb-product-balmuda.png" alt="BALMUDA" />
+          <div class="sc-hint">View Details →</div>
+        </div>
+        <div class="sc-info">
+          <div class="sc-name">BALMUDA</div>
+          <p class="sc-note">Design objects that restore meaning to the everyday rituals of eating and living.</p>
+          <div class="sc-quiet">The ritual, not just the result.</div>
+        </div>
+      </div>
+
+      <div class="slider-card"
+        data-name="Yamazaki Home"
+        data-category="Living · Organization"
+        data-img="images/eb-product-yamazaki.png"
+        data-detail="Founded in 1903, Yamazaki Home designs storage and organization systems that resolve the visual clutter of daily life. Their approach is deceptively simple: create objects that accommodate real behavior rather than ideal behavior. Items that look considered without demanding attention. Organization that disappears into the rhythm of the home."
+        data-quiet="The space between objects, resolved."
+        data-link="https://www.yamazakihome.com">
+        <div class="sc-img">
+          <img src="images/eb-product-yamazaki.png" alt="Yamazaki Home" />
+          <div class="sc-hint">View Details →</div>
+        </div>
+        <div class="sc-info">
+          <div class="sc-name">Yamazaki Home</div>
+          <p class="sc-note">Storage and organization systems that accommodate real behavior. The home, resolved.</p>
+          <div class="sc-quiet">The space between objects, resolved.</div>
+        </div>
+      </div>
+
+      <div class="slider-card"
+        data-name="ZERO Japan"
+        data-category="Kitchen · Ceramics"
+        data-img="images/eb-product-zero-japan.png"
+        data-detail="ZERO Japan creates teapots, mugs, and kitchen ceramics in Seto, Aichi — Japan's ceramic heartland. Their pieces are built for daily ritual: the grip of a handle, the pour of a spout, the weight of a cup in the hand. Each object is designed to be used, not displayed. Utility elevated to the level of quiet art."
+        data-quiet="The ceramics of everyday ritual."
+        data-link="https://www.zero-japan.com">
+        <div class="sc-img">
+          <img src="images/eb-product-zero-japan.png" alt="ZERO Japan" />
+          <div class="sc-hint">View Details →</div>
+        </div>
+        <div class="sc-info">
+          <div class="sc-name">ZERO Japan</div>
+          <p class="sc-note">Ceramics from Seto, Aichi. Teapots and cups designed to be used daily, not displayed.</p>
+          <div class="sc-quiet">The ceramics of everyday ritual.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="slider-dots" id="sliderDots"></div>
+</section>
+
+<!-- UNIT PHOTOS -->
+<section id="the-space" class="unit-section">
+  <div class="unit-header">
+    <span class="label">The Space</span>
+    <h2>210-220 E 22nd St, Unit #3L &nbsp;—&nbsp; Gramercy, Manhattan</h2>
+  </div>
+  <div class="unit-grid">
+    <div class="unit-img"><img src="images/unit-1.png" alt="Bedroom 1" /></div>
+    <div class="unit-img"><img src="images/unit-2.png" alt="Bedroom 2" /></div>
+    <div class="unit-img"><img src="images/unit-3.png" alt="Bedroom 3" /></div>
+    <div class="unit-img"><img src="images/unit-kitchen.png" alt="Kitchen" /></div>
+  </div>
+</section>
+
+<!-- NY LIFESTYLE MONITOR -->
+<section id="monitor" class="monitor">
+  <div class="monitor-inner">
+    <div class="monitor-left">
+      <span class="label">NY Lifestyle Monitor</span>
+      <h2>Join Our Verification Program.</h2>
+      <p>Frame feedback and participation as a premium privilege, not a chore. We seek your realizations from living here.</p>
+      <ul class="steps">
+        <li class="step"><span class="step-n">01</span><span><strong style="font-weight:500;">Arrival Check-in</strong> — Your first impressions of the space as a functioning home.</span></li>
+        <li class="step"><span class="step-n">02</span><span><strong style="font-weight:500;">Week One Report</strong> — How your work performance integrates with the environment.</span></li>
+        <li class="step"><span class="step-n">03</span><span><strong style="font-weight:500;">Month One Reflection</strong> — The items you reach for daily. The quiet differences you have noticed.</span></li>
+        <li class="step"><span class="step-n">04</span><span><strong style="font-weight:500;">Extended Living Review</strong> — Value verified through sustained use. What has become indispensable.</span></li>
+        <li class="step"><span class="step-n">05</span><span><strong style="font-weight:500;">Departure Insight</strong> — The transition from utility to attachment.</span></li>
+      </ul>
+    </div>
+    <div class="monitor-right">
+      <span class="label" style="color:rgba(200,180,150,0.8)">Your Reward</span>
+      <h3>The Gramercy<br>Selection Gift.</h3>
+      <p>A curated selection from the items you lived with — chosen based on your feedback. Products verified by your own experience, available to continue in your next home.</p>
+      <a href="#" class="btn-light" style="display:inline-block;">Apply for Monitor Program</a>
+      <div class="linen-img">
+        <img src="images/eb-linen.png" alt="Linen texture" style="object-position: center 40%;" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DETAILS & LOGISTICS -->
+<section id="details" class="details">
+  <div class="details-inner">
+    <span class="label">Details &amp; Logistics</span>
+    <h2>The Space.</h2>
+    <div class="details-grid">
+      <div>
+        <div class="price">$6,000</div>
+        <div class="price-sub">per month, starting from</div>
+        <div class="detail-rows">
+          <div class="row"><span class="row-label">Neighborhood</span><span>Gramercy Park, Manhattan</span></div>
+          <div class="row"><span class="row-label">Subway</span><span>Green Line — 5 min walk</span></div>
+          <div class="row"><span class="row-label">Union Square</span><span>7 minutes</span></div>
+          <div class="row"><span class="row-label">Grand Central</span><span>9 minutes</span></div>
+          <div class="row"><span class="row-label">Unit Type</span><span>Studio</span></div>
+          <div class="row"><span class="row-label">Minimum Stay</span><span>1 Month</span></div>
+        </div>
+        <p class="details-note">Monthly rates vary based on duration and availability. Extended stays may qualify for adjusted rates.</p>
+        <a href="#" class="btn-dark">Check Availability</a>
+        <a href="#monitor" class="btn-outline">Apply for Monitor Program</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FOOTER -->
+<section class="cta-footer">
+  <div class="cta-bg"></div>
+  <div class="cta-overlay"></div>
+  <div class="cta-inner">
+    <h2>A new standard for<br>monthly living.</h2>
+    <p>The Gramercy Park Project is a space where design, function, and comfort intersect.</p>
+    <div class="cta-btns">
+      <a href="#" class="btn-light">Check Availability</a>
+      <a href="#monitor" class="btn-ghost">Apply for Monitor Program</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>The Gramercy Park Project &nbsp;·&nbsp; A Curated Living Concept</div>
+  <div>210-220 E 22nd St #3L, Gramercy, New York</div>
+</footer>
+
+<!-- PRODUCT MODAL -->
+<div class="modal-overlay" id="productModal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <div class="modal-img">
+      <img src="" alt="" id="modalImg" />
+    </div>
+    <div class="modal-body">
+      <div class="modal-meta" id="modalMeta"></div>
+      <div class="modal-name" id="modalName"></div>
+      <p class="modal-desc" id="modalDesc"></p>
+      <p class="modal-quiet" id="modalQuiet"></p>
+      <a href="#" class="modal-link" id="modalLink" target="_blank" rel="noopener">Visit Brand Site</a>
+    </div>
+    <button class="modal-close" id="modalClose" aria-label="Close">&#215;</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  const track   = document.getElementById('sliderTrack');
+  const prevBtn = document.getElementById('sliderPrev');
+  const nextBtn = document.getElementById('sliderNext');
+  const dotsEl  = document.getElementById('sliderDots');
+  const cards   = track.querySelectorAll('.slider-card');
+  const CARD_W  = 362; // 360px card + 2px gap
+  let current = 0;
+
+  // Build dots
+  cards.forEach(function (_, i) {
+    var d = document.createElement('button');
+    d.className = 'slider-dot' + (i === 0 ? ' active' : '');
+    d.setAttribute('aria-label', 'Go to item ' + (i + 1));
+    d.addEventListener('click', function () { goTo(i); });
+    dotsEl.appendChild(d);
+  });
+  var dots = dotsEl.querySelectorAll('.slider-dot');
+
+  function visibleCount() {
+    return Math.max(1, Math.floor((track.parentElement.offsetWidth - 72) / CARD_W));
+  }
+  function maxIndex() {
+    return Math.max(0, cards.length - visibleCount());
+  }
+  function goTo(idx) {
+    current = Math.max(0, Math.min(idx, maxIndex()));
+    track.scrollTo({ left: current * CARD_W, behavior: 'smooth' });
+    updateUI();
+  }
+  function updateUI() {
+    dots.forEach(function (d, i) { d.classList.toggle('active', i === current); });
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current >= maxIndex();
+  }
+
+  prevBtn.addEventListener('click', function () { goTo(current - 1); });
+  nextBtn.addEventListener('click', function () { goTo(current + 1); });
+
+  // Sync dots on manual scroll / swipe
+  var scrollTimer;
+  track.addEventListener('scroll', function () {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function () {
+      current = Math.round(track.scrollLeft / CARD_W);
+      updateUI();
+    }, 80);
+  });
+
+  updateUI();
+
+  // ── MODAL ──
+  var overlay    = document.getElementById('productModal');
+  var modalImg   = document.getElementById('modalImg');
+  var modalMeta  = document.getElementById('modalMeta');
+  var modalName  = document.getElementById('modalName');
+  var modalDesc  = document.getElementById('modalDesc');
+  var modalQuiet = document.getElementById('modalQuiet');
+  var modalLink  = document.getElementById('modalLink');
+  var modalClose = document.getElementById('modalClose');
+
+  cards.forEach(function (card) {
+    card.addEventListener('click', function () {
+      var link = card.dataset.link;
+      modalImg.src        = card.dataset.img    || '';
+      modalImg.alt        = card.dataset.name   || '';
+      modalMeta.textContent  = card.dataset.category || 'Edited for Living';
+      modalName.textContent  = card.dataset.name     || '';
+      modalDesc.textContent  = card.dataset.detail   || '';
+      modalQuiet.textContent = card.dataset.quiet    || '';
+      if (link && link !== '#') {
+        modalLink.href         = link;
+        modalLink.style.display = '';
+      } else {
+        modalLink.style.display = 'none';
+      }
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+  });
+
+  function closeModal() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  modalClose.addEventListener('click', closeModal);
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+})();
+</script>
+
+</body>
+</html>
